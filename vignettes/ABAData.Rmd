@@ -1,0 +1,114 @@
+
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+```
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=10, fig.height=7, warning=FALSE, message=FALSE)
+options(width=110)
+```
+
+<!--
+%\VignetteIndexEntry{ABAData: gene expression data to use with enrichment analysis package ABAEnrichment}
+%\VignetteEngine{knitr::knitr}
+-->
+
+# ABAData: gene expression data from Allen Brain Atlas to use with enrichment analysis package ABAEnrichment
+
+Package: ABAData   
+Author: Steffi Grote   
+Date: August 08, 2015   
+
+## Overview
+This package provides the data used in the gene expression enrichment package `r Biocpkg("ABAEnrichment")`. It contains three datasets on gene expression in adult and developing human brains which base on data provided by the Allen Brain Atlas project [1-4]. The data and its processing is described below. For usage of the data for gene expression enrichment analyses please refer to the `r Biocpkg("ABAEnrichment")` vignette.
+
+Overview of the datasets included in ABAData:
+
+object | description
+-------- | ----------
+`dataset_adult` | microarray data from six adult donors
+`dataset_5_stages` | RNA-seq data from 42 donors grouped into five developmental stages (prenatal to adult)
+`dataset_dev_effect` | scores that describe the age effect on gene expression per gene and brain region
+
+## Data structure
+All datasets in the package are represented in a data.frame with the following columns:
+
+column | description
+-------- | ----------
+`hgnc_symbol` | HGNC-symbol
+`entrezgene` | Entrez-ID
+`ensembl_gene_id` | Ensembl-ID
+`structure` | brain region ID as used in the ontology from Allen Brain Atlas
+`signal` | normalized microarray data, RNA-seq data or developmental effect score 
+`age_category` | developmental stage, see below
+
+The column `age_category` indicates the developmental stage as follows:
+
+age_category | description
+-------- | ----------
+`0` | all developmental stages
+`1` | prenatal
+`2` | infant (0-2 yrs)
+`3` | child (3-11 yrs)
+`4` | adolescent (12-19 yrs) 
+`5` | adult (>19 yrs)
+
+## Data acquisition and manipulation 
+
+
+### Adult Human Brain
+
+#### Data from Allen Human Brain Atlas 
+The microarray gene expression data downloaded from  Allen Human Brain Atlas [3] contain expression data for 29176 genes (HGNC-symbols) from six adult human donors. 93% of known genes were hybridized with at least two probes. Gene expression was measured in a total of 414 brain regions and was normalized within and across donors as described in the Technical White Paper (March 2013 v.1) on http://human.brain-map.org/.
+
+
+#### Data manipulation for `dataset_adult`
+Expression data for genes obtained from multiple sources were merged, i.e. for each donor the values for one gene in one brain region were averaged (different probes and samples) and the data for the donors were pooled by taking an average for each gene in one brain region across all six donors.
+Entrez-ID and Ensembl-ID were added using `r Biocpkg ("biomaRt")` [5], and the gene set was reduced to protein coding genes (Ensembl v.69). The final dataset contains expression data for 15698 genes (Ensembl-IDs) in 414 brain regions:
+
+```{r}
+## load package
+require(ABAData)
+## require averaged gene expression data (microarray) from adult human brain regions
+data(dataset_adult)
+## look at first lines
+head(dataset_adult)
+```
+
+### Developing Human Brain
+
+#### Data from BrainSpan Atlas of the Developing Human Brain
+The RNA-seq dataset 'RNA-Seq Gencode v10 summarized to genes' was obtained from the BrainSpan Atlas of the Developing Human Brain, which contains expression data for 52376 genes (Ensembl-IDs) from 42 human donors of 31 different ages, 8 pcw to 40 yrs [4]. The downloaded dataset contained RPKM values assigned to genes and donors. A total of 26 brain regions were sampled, 10 of them in donors of five or less different ages. The remaining 16 brain regions were sampled in donors of 20 different ages or more. For details on the expression data see the documentation on http://brainspan.org/.  
+
+#### Data manipulation for `dataset_5_stages` and `dataset_dev_effect`
+To increase the power in detecting developmental effects by using highly overlapping brain regions the dataset for the enrichment analysis was restricted to the 16 brain regions sampled in at least 20 ages. As for the `dataset_adult` the dataset was limited to protein coding genes leading to a set of 17259 genes (Ensembl-IDs).  
+For the `dataset_5_stages` the expression data were summarized in five major developmental stages (`age_category` 1-5, see above). The mean expression of all donors in a given brain region in a developmental stage is assigned to a gene: 
+
+```{r}
+## require averaged gene expression data (RNA-seq) for 5 age categories
+data(dataset_5_stages)
+## look at first lines
+head(dataset_5_stages)
+```
+
+The data.frame `dataset_dev_effect` instead of expression values contains developmental effect scores which have been computed based on the data of the Atlas of the Developing Human Brain [4]: expression values (RPKM) were log2-transformed and averaged per age across individuals. The age, which is given in post-conceptional weeks (pcw), months or years, was transformed to pcw, assuming a pregnancy of 38 weeks, a month to have 4 weeks for infants aged under 1 year, and 1 year to have 52 weeks for older individuals. For each gene and structure a linear model was fit where cumulative gene expression over time is predicted by the age in pcw. The developmental effect score is defined to be 1 - R^2_adjusted for the model. Hence, higher values of that score come from lower R^2 which indicate less uniform gene expression over time. Scores that result to be NAs given all expression values are 0, are set to be 0, consistent with a gene with constant expression. Again, the `dataset_dev_effect` has the same structure as the datasets above, but with the `signal` column indicating the developmental effect scores instead of gene expression: 
+
+```{r}
+## require developmental effect score for genes in brain regions
+data(dataset_dev_effect)
+## look at first lines
+head(dataset_dev_effect)
+```
+
+## References
+
+[1] Hawrylycz, M.J. et al. (2012) An anatomically comprehensive atlas of the adult human brain transcriptome, Nature 489: 391-399. [doi:10.1038/nature11405]
+
+[2] Miller, J.A. et al. (2014) Transcriptional landscape of the prenatal human brain, Nature 508: 199-206. [doi:10.1038/nature13185]
+
+[3] Allen Institute for Brain Science. Allen Human Brain Atlas (Internet). Available from:
+[http://human.brain-map.org/]
+
+[4] Allen Institute for Brain Science. BrainSpan Atlas of the Developing Human Brain
+(Internet). Available from: [http://brainspan.org/]
+
+[5] Durinck, S. et al. (2009) Mapping identifiers for the integration of genomic datasets with the  R/Bioconductor package biomaRt, Nature Protocols 4: 1184-1191
