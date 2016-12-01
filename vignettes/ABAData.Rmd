@@ -16,7 +16,7 @@ options(width=110)
 
 Package: ABAData   
 Author: Steffi Grote   
-Date: October 06, 2016   
+Date: December 01, 2016   
 
 ## Overview
 This package provides the data used in the gene expression enrichment package `r Biocpkg("ABAEnrichment")`. It contains three datasets on gene expression in adult and developing human brains which base on data provided by the Allen Brain Atlas project [1-4]. The data and its processing is described below. For usage of the data for gene expression enrichment analyses please refer to the `r Biocpkg("ABAEnrichment")` vignette.
@@ -55,7 +55,7 @@ age_category | description
 #### Get more information on brain region IDs
 The column `structure` contains the brain region IDs used in the ontology from Allen Brain Atlas. However, also functions provided in the `r Biocpkg("ABAEnrichment")` package (>= 1.3.4) can be used to retrieve the name and superstructures of a given brain region ID:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 ## load ABAEnrichment software package
 require(ABAEnrichment)
 ## get name and superstructures of brain region 4679
