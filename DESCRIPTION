@@ -2,7 +2,7 @@ Package: ABAData
 Type: Package
 Title: Averaged gene expression in human brain regions from Allen Brain
         Atlas
-Version: 1.5.0
+Version: 1.5.1
 Date: 2015-08-06
 Author: Steffi Grote
 Maintainer: Steffi Grote <steffi_grote@eva.mpg.de>
@@ -17,7 +17,7 @@ Description: Provides the data for the gene expression enrichment
         datasets are restricted to protein coding genes.
 License: GPL (>= 2)
 Depends: R (>= 3.2)
-Suggests: BiocStyle, knitr
+Suggests: BiocStyle, knitr, ABAEnrichment
 VignetteBuilder: knitr
 biocViews: ExpressionData, Homo_sapiens_Data, MicroarrayData,
         RNASeqData
